@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knutselmateriaal Inventaris</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .filter-select {
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            background: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:nth-child(2) {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+        }
+
+        .stat-card:nth-child(3) {
+            background: linear-gradient(135deg, #45b7d1, #2c5aa0);
+        }
+
+        .stat-card:nth-child(4) {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .category-section {
+            margin-bottom: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .category-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .category-header:hover {
+            background: linear-gradient(135deg, #5a67d8, #6b46c1);
+        }
+
+        .category-count {
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .category-content {
+            background: white;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .category-content.active {
+            max-height: 2000px;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            padding: 20px;
+        }
+
+        .item-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .item-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .item-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .item-quantity {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .quantity-display {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .quantity-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .quantity-btn {
+            background: #4ecdc4;
+            color: white;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quantity-btn:hover {
+            background: #45b7d1;
+            transform: scale(1.1);
+        }
+
+        .quantity-btn:active {
+            transform: scale(0.95);
+        }
+
+        .quantity-btn.decrease {
+            background: #ff6b6b;
+        }
+
+        .quantity-btn.decrease:hover {
+            background: #ff5252;
+        }
+
+        .low-stock {
+            background: linear-gradient(135deg, #fff3e0, #ffccbc) !important;
+            border-left: 4px solid #ff9800;
+        }
+
+        .out-of-stock {
+            background: linear-gradient(135deg, #ffebee, #ffcdd2) !important;
+            border-left: 4px solid #f44336;
+            opacity: 0.7;
+        }
+
+        .stock-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4caf50;
+        }
+
+        .stock-indicator.low {
+            background: #ff9800;
+        }
+
+        .stock-indicator.out {
+            background: #f44336;
+        }
+
+        .export-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .export-btn:hover {
+            background: linear-gradient(135deg, #5a67d8, #6b46c1);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .toggle-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .toggle-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .items-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Knutselmateriaal Inventaris</h1>
+        
+        <div class="controls">
+            <input type="text" class="search-box" placeholder="Zoek materiaal..." id="searchInput">
+            <select class="filter-select" id="categoryFilter">
+                <option value="">Alle categorieën</option>
+            </select>
+            <select class="filter-select" id="stockFilter">
+                <option value="">Alle voorraad</option>
+                <option value="low">Lage voorraad</option>
+                <option value="out">Uitverkocht</option>
+            </select>
+            <button class="export-btn" onclick="exportToCSV()">📊 Export naar CSV</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <span class="stat-number" id="totalItems">0</span>
+                <span class="stat-label">Totaal Items</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="totalCategories">0</span>
+                <span class="stat-label">Categorieën</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="lowStockItems">0</span>
+                <span class="stat-label">Lage Voorraad</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number" id="outOfStockItems">0</span>
+                <span class="stat-label">Uitverkocht</span>
+            </div>
+        </div>
+
+        <div id="categoriesContainer"></div>
+    </div>
+
+    <script>
+        let inventory = {
+            "Verf & Kleurstoffen": [
+                { name: "Witte boetseerklei", quantity: 9, unit: "kg" },
+                { name: "Gele acrylverf", quantity: 1, unit: "750ml" },
+                { name: "Rode posterverf", quantity: 1, unit: "1L" },
+                { name: "Magenta textielverf", quantity: 1, unit: "250ml" },
+                { name: "Lichtgroene acrylverf", quantity: 1, unit: "100ml" },
+                { name: "Roze acrylverf", quantity: 1, unit: "750ml" },
+                { name: "Blauwe acrylverf", quantity: 1, unit: "750ml" },
+                { name: "Paarse acrylverf", quantity: 1, unit: "750ml" },
+                { name: "Rosé acrylverf", quantity: 2, unit: "250ml" },
+                { name: "Zilver acrylverf", quantity: 1, unit: "100ml" },
+                { name: "Bruine acrylverf", quantity: 2, unit: "250ml" },
+                { name: "Zwarte acrylverf", quantity: 2, unit: "100ml" },
+                { name: "Lichtgroene acrylverf", quantity: 2, unit: "250ml" },
+                { name: "Creative paint set", quantity: 1, unit: "14 kleuren" },
+                { name: "Acrylic spray paint", quantity: 2, unit: "set van 4" },
+                { name: "Gele posterverf", quantity: 1, unit: "100ml" },
+                { name: "Zwarte posterverf", quantity: 1, unit: "300ml" },
+                { name: "Lichtroze posterverf", quantity: 1, unit: "800ml" },
+                { name: "Waterverfsets", quantity: 13, unit: "stuks" },
+                { name: "Witte plakaatverf", quantity: 1, unit: "100ml" },
+                { name: "Gele textielverf", quantity: 1, unit: "50ml" },
+                { name: "Witte paint markers", quantity: 10, unit: "stuks" }
+            ],
+            "Lijm & Bevestiging": [
+                { name: "Alleslijm", quantity: 13, unit: "stuks" },
+                { name: "Lijmstick", quantity: 19, unit: "stuks" },
+                { name: "Lijmpistool", quantity: 1, unit: "stuks" },
+                { name: "Lijmpistoolvulling", quantity: 12, unit: "stuks" },
+                { name: "Knutsellijm", quantity: 2, unit: "1L" },
+                { name: "Modge podge", quantity: 1, unit: "236ml" },
+                { name: "Gesso", quantity: 4, unit: "halve flessen" },
+                { name: "Duc tape", quantity: 2, unit: "rollen" },
+                { name: "Dikke doorzichtige tape", quantity: 2, unit: "rollen" },
+                { name: "Plakband voor crepe bloemen", quantity: 1, unit: "rol" }
+            ],
+            "Textiel & Stoffen": [
+                { name: "Mozaïk lappen stof", quantity: 7, unit: "stuks" },
+                { name: "T-shirts om in te verven", quantity: 10, unit: "stuks" },
+                { name: "Crepe papier", quantity: 5, unit: "pakken" },
+                { name: "Grote vuile lakens", quantity: 2, unit: "stuks" },
+                { name: "KIST verkleedkleren", quantity: 1, unit: "kist" }
+            ],
+            "Kralen & Sieraden": [
+                { name: "Platte kralen", quantity: 4, unit: "doosjes" },
+                { name: "Kleien parels", quantity: 3, unit: "doosjes" },
+                { name: "Doorzichtige draad voor armbandjes", quantity: 2, unit: "rollen" },
+                { name: "Mini platte kralen", quantity: 1, unit: "doosje" },
+                { name: "Letterparels", quantity: 6, unit: "doosjes" },
+                { name: "Embroidery draad", quantity: 2, unit: "80 rolletjes" },
+                { name: "Zilver en gouden parels", quantity: 1, unit: "grote doos" }
+            ],
+            "Tekenmateriaal": [
+                { name: "Stoepkrijt/bordkrijt/bordenwisser", quantity: 1, unit: "doos" },
+                { name: "Kleurpotloden", quantity: 1, unit: "doosje" },
+                { name: "Dunne washi-tape", quantity: 18, unit: "rollen" },
+                { name: "Kleurpotloden klein", quantity: 3, unit: "sets van 12" },
+                { name: "Silky crayons", quantity: 4, unit: "sets van 8" },
+                { name: "Stempelstiften", quantity: 6, unit: "stuks" },
+                { name: "Twinmarkerstiften roze", quantity: 1, unit: "doosje" },
+                { name: "Twinmarkerstiften groen/bruin", quantity: 1, unit: "doosje" },
+                { name: "Wit tekenpapier groot", quantity: 1, unit: "rol" },
+                { name: "Bruin tekenpapier groot", quantity: 2, unit: "rollen" },
+                { name: "Tekenpotloden", quantity: 72, unit: "stuks" },
+                { name: "Krijtbordmarkers", quantity: 4, unit: "stuks" },
+                { name: "Zwarte fineliners", quantity: 9, unit: "stuks" },
+                { name: "Pastelkrijt/potloden", quantity: 1, unit: "doos" }
+            ],
+            "Handwerk & Naaien": [
+                { name: "Wasknijpers", quantity: 1, unit: "doos" },
+                { name: "Breinaalden", quantity: 14, unit: "sets" },
+                { name: "Prikpennen", quantity: 31, unit: "stuks" },
+                { name: "Pijpenragers en balletjes", quantity: 1, unit: "doosje" },
+                { name: "Stevig wol/touw", quantity: 2, unit: "dozen" },
+                { name: "Stoffenschaar", quantity: 1, unit: "stuks" },
+                { name: "Naainaalden en knopen", quantity: 1, unit: "doosje" },
+                { name: "Instructies macrame armbandjes", quantity: 1, unit: "boekje" }
+            ],
+            "Canvas & Schildermateriaal": [
+                { name: "Vierkante platte canvas", quantity: 23, unit: "stuks" },
+                { name: "Rechthoekige platte canvas", quantity: 17, unit: "stuks" },
+                { name: "Dikke canvas 20x20 cm", quantity: 4, unit: "stuks" },
+                { name: "Dikke penselen", quantity: 16, unit: "stuks" },
+                { name: "Snijmatten", quantity: 9, unit: "stuks" },
+                { name: "Primer spuitbussen", quantity: 3, unit: "stuks" },
+                { name: "Vernis", quantity: 1, unit: "restje" }
+            ],
+            "Mozaïek & Decoratie": [
+                { name: "Mozaïk", quantity: 27, unit: "doosjes" },
+                { name: "Crepe bloemen maken", quantity: 1, unit: "doos" },
+                { name: "Lint verschillende kleuren", quantity: 1, unit: "verzameling" },
+                { name: "Glazen bokalen en potjes", quantity: 1, unit: "boodschappentas" },
+                { name: "Middelgrote witte keien", quantity: 1, unit: "doos" },
+                { name: "Wiebelogen", quantity: 3, unit: "zakjes van 80" },
+                { name: "Stokjes voor crepe bloemen", quantity: 1, unit: "zakje" }
+            ],
+            "Accessoires & Overig": [
+                { name: "Blinddoeken/slaapmaskers", quantity: 15, unit: "stuks" },
+                { name: "Wattenbolletjes", quantity: 50, unit: "stuks" },
+                { name: "Grote belleblaas", quantity: 1, unit: "stuks" },
+                { name: "Opvulling belleblaas", quantity: 2, unit: "grote" },
+                { name: "Herbruikbare potjes voor verf", quantity: 21, unit: "stuks" },
+                { name: "Kartonnen potjes", quantity: 12, unit: "stuks" }
+            ]
+        };
+
+        let originalInventory = JSON.parse(JSON.stringify(inventory));
+
+        function updateStats() {
+            let totalItems = 0;
+            let lowStockItems = 0;
+            let outOfStockItems = 0;
+            
+            for (let category in inventory) {
+                for (let item of inventory[category]) {
+                    totalItems++;
+                    if (item.quantity === 0) {
+                        outOfStockItems++;
+                    } else if (item.quantity <= 3) {
+                        lowStockItems++;
+                    }
+                }
+            }
+            
+            document.getElementById('totalItems').textContent = totalItems;
+            document.getElementById('totalCategories').textContent = Object.keys(inventory).length;
+            document.getElementById('lowStockItems').textContent = lowStockItems;
+            document.getElementById('outOfStockItems').textContent = outOfStockItems;
+        }
+
+        function renderInventory() {
+            const container = document.getElementById('categoriesContainer');
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const stockFilter = document.getElementById('stockFilter').value;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            container.innerHTML = '';
+            
+            // Update category filter options
+            const categorySelect = document.getElementById('categoryFilter');
+            if (categorySelect.children.length === 1) {
+                for (let category in inventory) {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    categorySelect.appendChild(option);
+                }
+            }
+            
+            for (let category in inventory) {
+                if (categoryFilter && category !== categoryFilter) continue;
+                
+                const filteredItems = inventory[category].filter(item => {
+                    if (searchTerm && !item.name.toLowerCase().includes(searchTerm)) return false;
+                    if (stockFilter === 'low' && item.quantity > 3) return false;
+                    if (stockFilter === 'out' && item.quantity > 0) return false;
+                    return true;
+                });
+                
+                if (filteredItems.length === 0) continue;
+                
+                const categorySection = document.createElement('div');
+                categorySection.className = 'category-section';
+                
+                const categoryHeader = document.createElement('div');
+                categoryHeader.className = 'category-header';
+                categoryHeader.innerHTML = `
+                    <span>${category}</span>
+                    <div>
+                        <span class="category-count">${filteredItems.length} items</span>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                `;
+                
+                const categoryContent = document.createElement('div');
+                categoryContent.className = 'category-content active';
+                
+                const itemsGrid = document.createElement('div');
+                itemsGrid.className = 'items-grid';
+                
+                filteredItems.forEach((item, index) => {
+                    const itemCard = document.createElement('div');
+                    itemCard.className = 'item-card';
+                    
+                    if (item.quantity === 0) {
+                        itemCard.classList.add('out-of-stock');
+                    } else if (item.quantity <= 3) {
+                        itemCard.classList.add('low-stock');
+                    }
+                    
+                    const stockIndicatorClass = item.quantity === 0 ? 'out' : item.quantity <= 3 ? 'low' : '';
+                    
+                    itemCard.innerHTML = `
+                        <div class="stock-indicator ${stockIndicatorClass}"></div>
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-quantity">
+                            <div class="quantity-display">${item.quantity} ${item.unit}</div>
+                            <div class="quantity-controls">
+                                <button class="quantity-btn decrease" onclick="changeQuantity('${category}', ${index}, -1)">-</button>
+                                <button class="quantity-btn" onclick="changeQuantity('${category}', ${index}, 1)">+</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    itemsGrid.appendChild(itemCard);
+                });
+                
+                categoryContent.appendChild(itemsGrid);
+                categorySection.appendChild(categoryHeader);
+                categorySection.appendChild(categoryContent);
+                container.appendChild(categorySection);
+                
+                // Toggle functionality
+                categoryHeader.addEventListener('click', () => {
+                    categoryContent.classList.toggle('active');
+                    const icon = categoryHeader.querySelector('.toggle-icon');
+                    icon.classList.toggle('rotated');
+                });
+            }
+            
+            updateStats();
+        }
+
+        function changeQuantity(category, itemIndex, change) {
+            const item = inventory[category][itemIndex];
+            item.quantity = Math.max(0, item.quantity + change);
+            renderInventory();
+        }
+
+        function exportToCSV() {
+            let csv = 'Categorie,Product,Hoeveelheid,Eenheid,Status\n';
+            
+            for (let category in inventory) {
+                for (let item of inventory[category]) {
+                    let status = 'OK';
+                    if (item.quantity === 0) status = 'Uitverkocht';
+                    else if (item.quantity <= 3) status = 'Lage voorraad';
+                    
+                    csv += `"${category}","${item.name}","${item.quantity}","${item.unit}","${status}"\n`;
+                }
+            }
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'knutselmateriaal_inventaris.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', renderInventory);
+        document.getElementById('categoryFilter').addEventListener('change', renderInventory);
+        document.getElementById('stockFilter').addEventListener('change', renderInventory);
+
+        // Initial render
+        renderInventory();
+    </script>
+</body>
+</html>
